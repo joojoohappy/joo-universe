@@ -1,0 +1,359 @@
+@import "tailwindcss";
+
+/* ── Fonts (self-hosted, see public/fonts) ─────────────────────────────── */
+/* Syne variable (wght 400–800, Latin subset) — SIL Open Font License 1.1 */
+@font-face {
+  font-family: "Syne";
+  src: url("/fonts/syne-latin-wght.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400 800;
+  /* The display type is the composition; avoid a fallback flash. */
+  font-display: block;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* IBM Plex Mono Regular — SIL Open Font License 1.1 */
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("/fonts/ibm-plex-mono-regular.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@theme {
+  --font-display: "Syne", "Arial Black", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --color-ink: #1a1a18;
+  --color-paper: #f2f2ef;
+  /* #9a9a92 in the export; darkened to meet WCAG AA (4.57:1 on paper). */
+  --color-muted: #6e6e68;
+  --color-soft: #65655f;
+  --color-body: #4a4a44;
+  --color-line: #d8d8d0;
+  --color-lime: #c8ff00;
+  --color-pink: #efadaf;
+  --color-night-text: #aaaaa3;
+  --color-night-soft: #999993;
+  --color-night-line: #555551;
+  --color-orbit: #454541;
+}
+
+/* Animatable custom properties (used for proximity + tilt). */
+@property --i {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+@property --px {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+@property --py {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────── */
+@layer base {
+  html {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+  body {
+    margin: 0;
+    font-family: var(--font-mono);
+  }
+  ::selection {
+    background: var(--color-lime);
+    color: var(--color-ink);
+  }
+  :focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+  .night :focus-visible {
+    outline-color: var(--color-lime);
+  }
+}
+
+/* The page is the size container: `cqw` excludes the scrollbar, unlike `vw`. */
+.site {
+  container-type: inline-size;
+  overflow-x: clip;
+}
+
+.sr-only-focusable:not(:focus):not(:focus-within) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Scaled canvases ───────────────────────────────────────────────────── *
+ * Desktop/tablet (≥768px) keep the 1440px Figma composition and scale it
+ * with the viewport (capped at 1920px). Phones (<768px) use a separate
+ * 390px-wide composition. Elements declare desktop (--x/--y/…) and mobile
+ * (--mx/--my/…) coordinates; `.cv` picks the active set.               */
+.canvas {
+  --u: calc(min(100cqw, 1920px) / 1440);
+  position: relative;
+  width: calc(1440 * var(--u));
+  margin-inline: auto;
+}
+@media (max-width: 767.98px) {
+  .canvas {
+    --u: calc(100cqw / 390);
+  }
+}
+
+.cv {
+  --ax: var(--x);
+  --ay: var(--y);
+  --aw: var(--w);
+  --ah: var(--h);
+  --afs: var(--fs);
+  position: absolute;
+  left: calc(var(--ax) * var(--u));
+  top: calc(var(--ay) * var(--u));
+  width: calc(var(--aw) * var(--u));
+  height: calc(var(--ah) * var(--u));
+}
+.cv-type {
+  font-size: calc(var(--afs) * var(--u));
+}
+@media (max-width: 767.98px) {
+  .cv {
+    --ax: var(--mx);
+    --ay: var(--my);
+    --aw: var(--mw);
+    --ah: var(--mh);
+    --afs: var(--mfs);
+  }
+}
+
+/* ── Hero ─────────────────────────────────────────────────────────────── */
+.hero-canvas {
+  height: calc(1130 * var(--u));
+}
+@media (max-width: 767.98px) {
+  .hero-canvas {
+    height: calc(740 * var(--u));
+  }
+}
+
+/* 2.5D: the portrait tilts toward the pointer, the type drifts against it. */
+.tilt {
+  transform: perspective(1400px) rotateY(calc(var(--px) * 5deg)) rotateX(calc(var(--py) * -4deg))
+    translate3d(calc(var(--px) * 10px), calc(var(--py) * 8px), 0);
+  transform-origin: 50% 60%;
+  outline: 1px solid transparent; /* anti-aliases the tilted edges */
+  transition:
+    --px 700ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    --py 700ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  will-change: transform;
+}
+.drift {
+  transform: translate3d(calc(var(--px) * var(--depth, -8) * 1px), calc(var(--py) * var(--depth, -8) * 0.6px), 0);
+}
+
+/* Photo fragments: a masked window onto a larger photo. --i (0–1) is the
+ * attention intensity, driven by pointer proximity / scroll / focus. */
+.frag {
+  --aox: var(--ox);
+  --aoy: var(--oy);
+  --aww: var(--ww);
+  --awh: var(--wh);
+  --grow: 0.32;
+  opacity: calc(var(--o) + (1 - var(--o)) * var(--i));
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size:
+    calc(var(--aww) * var(--u) * (1 + var(--i) * var(--grow)))
+    calc(var(--awh) * var(--u) * (1 + var(--i) * var(--grow)));
+  mask-size:
+    calc(var(--aww) * var(--u) * (1 + var(--i) * var(--grow)))
+    calc(var(--awh) * var(--u) * (1 + var(--i) * var(--grow)));
+  -webkit-mask-position:
+    calc((var(--aox) - var(--aww) * var(--i) * var(--grow) / 2) * var(--u))
+    calc((var(--aoy) - var(--awh) * var(--i) * var(--grow) / 2) * var(--u));
+  mask-position:
+    calc((var(--aox) - var(--aww) * var(--i) * var(--grow) / 2) * var(--u))
+    calc((var(--aoy) - var(--awh) * var(--i) * var(--grow) / 2) * var(--u));
+  transition: --i 420ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.frag img {
+  transform: scale(calc(1.04 - var(--i) * 0.04));
+}
+@media (max-width: 767.98px) {
+  .frag {
+    --aox: var(--mox);
+    --aoy: var(--moy);
+    --aww: var(--mww);
+    --awh: var(--mwh);
+  }
+}
+
+/* Invisible hit target + caption, positioned over the fragment's window. */
+.frag-hit {
+  position: absolute;
+  left: calc((var(--ax) + var(--aox)) * var(--u));
+  top: calc((var(--ay) + var(--aoy)) * var(--u));
+  width: calc(var(--aww) * var(--u));
+  height: calc(var(--awh) * var(--u));
+  min-width: 44px;
+  min-height: 44px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--color-ink);
+  -webkit-tap-highlight-color: transparent;
+}
+.frag-group {
+  --grow: 0.32;
+  --aox: var(--ox);
+  --aoy: var(--oy);
+  --aww: var(--ww);
+  --awh: var(--wh);
+  --ax: var(--x);
+  --ay: var(--y);
+}
+@media (max-width: 767.98px) {
+  .frag-group {
+    --aox: var(--mox);
+    --aoy: var(--moy);
+    --aww: var(--mww);
+    --awh: var(--mwh);
+    --ax: var(--mx);
+    --ay: var(--my);
+  }
+}
+.frag-cap {
+  position: absolute;
+  left: calc((var(--ax) + var(--aox)) * var(--u));
+  top: calc((var(--ay) + var(--aoy) + var(--awh) * (1 + var(--grow, 0.32) / 2)) * var(--u) + 8px);
+  opacity: 0;
+  transform: translateY(-3px);
+  transition:
+    opacity 300ms ease,
+    transform 300ms ease;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.frag-cap[data-side="above"] {
+  top: auto;
+  bottom: calc(100% - (var(--ay) + var(--aoy) - var(--awh) * var(--grow, 0.32) / 2) * var(--u) + 8px);
+}
+.frag-group[data-on="true"] .frag-cap {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tilt,
+  .drift {
+    transform: none;
+  }
+  .frag,
+  .frag-group {
+    --grow: 0;
+  }
+  .frag {
+    transition: none;
+  }
+  .frag img {
+    transform: none;
+  }
+  .frag-cap {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* ── Questions orbit ──────────────────────────────────────────────────── */
+.orbit-stage {
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.orbit-stage[data-dragging="true"] {
+  cursor: grabbing;
+}
+
+/* ── NOW ──────────────────────────────────────────────────────────────── */
+.now-wrap {
+  --u: calc(min(100cqw, 1920px) / 1440);
+  max-width: calc(1440 * var(--u));
+}
+.now-type {
+  font-size: 25cqw;
+  margin-left: calc(-5cqw - 20px);
+  margin-top: 28px;
+}
+.now-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-areas: "body" "links" "footer";
+  margin-top: 32px;
+}
+.now-body {
+  grid-area: body;
+}
+.now-links {
+  grid-area: links;
+  margin-top: 36px;
+}
+.now-footer {
+  grid-area: footer;
+  margin-top: 56px;
+}
+@media (min-width: 768px) {
+  .now-type {
+    font-size: calc(270 * var(--u));
+    margin-left: calc(-80 * var(--u) - 40px);
+    margin-top: max(20px, calc(100 * var(--u) - 73px));
+  }
+  .now-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: "body links" "footer footer";
+    column-gap: 48px;
+    margin-top: 40px;
+  }
+  .now-links {
+    margin-top: 15px;
+  }
+}
+@media (min-width: 1024px) {
+  .now-grid {
+    grid-template-columns: calc(660 * var(--u)) calc(450 * var(--u)) minmax(0, 1fr);
+    grid-template-areas: "footer body links";
+    column-gap: 0;
+    margin-top: max(24px, calc(25 * var(--u)));
+  }
+  .now-body {
+    padding-right: 24px;
+  }
+  .now-footer {
+    align-self: end;
+    margin-top: 0;
+  }
+}

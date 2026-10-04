@@ -1,0 +1,10 @@
+{
+  "description": "Showcase your personal brand and portfolio with a customizable website designed to highlight your skills, projects, and professional story.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
