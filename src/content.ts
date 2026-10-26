@@ -45,7 +45,6 @@ export const projects: Project[] = [
     question: "What is the last time you observe your surroundings?",
     href: "https://github.com/joojoohappy/look-up",
   },
-  { id: "writing", name: "WRITING", question: "What becomes clearer when I put it into words?" },
   { id: "ai-safety", name: "AI SAFETY", question: "What does it take to make AI worthy of our trust?" },
   {
     id: "mosaic",
@@ -53,6 +52,9 @@ export const projects: Project[] = [
     question: "What if... existing the place that get close with technology, human and art?",
     href: "https://github.com/joojoohappy/mosAIc",
   },
+  { id: "unperformed", name: "UNPERFORMED", href: "https://github.com/joojoohappy/Unperformed" },
+  { id: "inference-lab", name: "INFERENCE LAB", href: "https://github.com/joojoohappy/Inference_Lab" },
+  { id: "pace-together", name: "PACE TOGETHER", href: "https://github.com/joojoohappy/pace-together" },
 ];
 
 export const now = {

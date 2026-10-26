@@ -17,9 +17,13 @@ const N = projects.length;
  * the ellipse and a radius factor, measured from the Figma export so the default
  * state reproduces the original placement. Items travel between slots along
  * the ellipse when the orbit rotates. */
-const SLOT_ANGLES = [-90, -50.8, 36.5, 146, 217.8];
-const SLOT_R_DESKTOP = [0.594, 1.165, 1.033, 1.223, 1.33];
-const SLOT_R_MOBILE = [0.62, 1.12, 1.08, 1.08, 1.12];
+const FIGMA_ANGLES = [-90, -50.8, 36.5, 146, 217.8];
+const FIGMA_R_DESKTOP = [0.594, 1.165, 1.033, 1.223, 1.33];
+const FIGMA_R_MOBILE = [0.62, 1.12, 1.08, 1.08, 1.12];
+// With more than five projects, spread the extra slots evenly around the ellipse.
+const SLOT_ANGLES = N === FIGMA_ANGLES.length ? FIGMA_ANGLES : Array.from({ length: N }, (_, k) => -90 + (k * 360) / N);
+const SLOT_R_DESKTOP = N === FIGMA_ANGLES.length ? FIGMA_R_DESKTOP : Array.from({ length: N }, (_, k) => (k === 0 ? 0.594 : k % 2 ? 1.2 : 1.05));
+const SLOT_R_MOBILE = N === FIGMA_ANGLES.length ? FIGMA_R_MOBILE : Array.from({ length: N }, (_, k) => (k === 0 ? 0.62 : k % 2 ? 1.12 : 1.02));
 
 type Geometry = {
   width: number;
