@@ -59,7 +59,7 @@ export const projects: Project[] = [
 
 export const now = {
   place: "Taipei",
-  lines: ["Customer Engineer", "Building MEmory", "Researching AI Safety", "Writing", "Learning"],
+  lines: ["Customer Engineer", "Building MEmory", "Researching AI Safety", "Learning"],
   aside: "Probably somewhere between projects.",
 };
 
